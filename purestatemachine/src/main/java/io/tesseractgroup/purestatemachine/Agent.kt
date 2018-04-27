@@ -1,7 +1,11 @@
 package io.tesseractgroup.purestatemachine
 
-import io.tesseractgroup.purestatemachine.AgentConcurrencyType.*
-import org.jetbrains.anko.doAsync
+import io.tesseractgroup.purestatemachine.AgentConcurrencyType.ASYNC
+import io.tesseractgroup.purestatemachine.AgentConcurrencyType.SYNC
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
+import java.util.*
 
 /**
  * PureStateMachineApp
@@ -13,7 +17,9 @@ enum class AgentConcurrencyType {
 
 class Agent<State>(private var state: State) {
 
-    fun <Result> fetch(closure: ((State) -> Result)) : Result {
+    private val privateThread = newSingleThreadContext("Agent-${UUID.randomUUID()}")
+
+    fun <Result> fetch(closure: ((State) -> Result)): Result {
         var result: Result? = null
         sync {
             result = closure(state)
@@ -21,8 +27,8 @@ class Agent<State>(private var state: State) {
         return result!!
     }
 
-    fun update(type: AgentConcurrencyType = ASYNC, closure: (State) -> State ) {
-        when(type){
+    fun update(type: AgentConcurrencyType = ASYNC, closure: (State) -> State) {
+        when (type) {
             ASYNC -> {
                 async {
                     state = closure(state)
@@ -36,7 +42,7 @@ class Agent<State>(private var state: State) {
         }
     }
 
-    fun <Result> fetchAndUpdate(closure: (State) -> Pair<State, Result>) : Result {
+    fun <Result> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
         var result: Result? = null
         sync {
             val resultPair = closure(state)
@@ -50,17 +56,15 @@ class Agent<State>(private var state: State) {
         async(closure)
     }
 
-    private fun sync(closure: (State) -> Unit){
-        synchronized(this){
+    private fun sync(closure: (State) -> Unit) {
+        runBlocking(privateThread) {
             closure(state)
         }
     }
 
-    private fun async(closure: (State) -> Unit){
-        doAsync {
-            synchronized(this){
-                closure(state)
-            }
+    private fun async(closure: (State) -> Unit) {
+        launch(privateThread) {
+            closure(state)
         }
     }
 
