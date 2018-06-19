@@ -19,7 +19,7 @@ class Agent<State>(private var state: State) {
 
     private val privateThread = newSingleThreadContext("Agent-${UUID.randomUUID()}")
 
-    fun <Result> fetch(closure: ((State) -> Result)): Result {
+    fun <Result: Any> fetch(closure: ((State) -> Result)): Result {
         var result: Result? = null
         sync {
             result = closure(state)
@@ -42,7 +42,7 @@ class Agent<State>(private var state: State) {
         }
     }
 
-    fun <Result> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
+    fun <Result: Any> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
         var result: Result? = null
         sync {
             val resultPair = closure(state)

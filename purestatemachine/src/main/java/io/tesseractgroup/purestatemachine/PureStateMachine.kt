@@ -5,7 +5,7 @@ package io.tesseractgroup.purestatemachine
  * Created by matt on 2/22/18.
  */
 
-class PureStateMachine<State, Event, Command>(initialState: State, private val handler: (State, Event) -> Pair<State, Command>) {
+class PureStateMachine<State: Any, Event: Any, Command: Any>(initialState: State, private val handler: (State, Event) -> Pair<State, Command>) {
 
     private val state: Agent<State> = Agent(initialState)
 
