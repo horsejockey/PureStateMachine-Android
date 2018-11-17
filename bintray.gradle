@@ -5,6 +5,9 @@ project.archivesBaseName = PROJ_ARTIFACTID
 apply plugin: 'com.jfrog.bintray'
 apply plugin: "com.jfrog.artifactory"
 
+// Upload new version process
+// Bump build version in gradle.properties
+// ./gradlew bintrayUpload
 
 task kotlinDocJar(type: Jar, dependsOn: dokkaJavadoc) {
     classifier = 'javadoc'
@@ -61,7 +64,7 @@ publishing {
 }
 
 afterEvaluate {
-    publishing.publications.mavenKotlin.artifact(bundleRelease)
+    publishing.publications.mavenKotlin.artifact(bundleReleaseAar)
 }
 
 bintray {

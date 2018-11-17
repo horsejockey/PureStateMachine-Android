@@ -2,9 +2,10 @@ package io.tesseractgroup.purestatemachine
 
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.ASYNC
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.SYNC
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import java.util.*
 
 /**
@@ -52,10 +53,6 @@ class Agent<State>(private var state: State) {
         return result!!
     }
 
-    fun cast(closure: (State) -> Unit) {
-        async(closure)
-    }
-
     private fun sync(closure: (State) -> Unit) {
         runBlocking(privateThread) {
             closure(state)
@@ -63,7 +60,7 @@ class Agent<State>(private var state: State) {
     }
 
     private fun async(closure: (State) -> Unit) {
-        launch(privateThread) {
+        GlobalScope.launch(privateThread) {
             closure(state)
         }
     }

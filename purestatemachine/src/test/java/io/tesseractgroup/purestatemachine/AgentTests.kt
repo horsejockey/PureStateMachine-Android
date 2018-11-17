@@ -1,8 +1,6 @@
 package io.tesseractgroup.purestatemachine
 
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.*
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 
@@ -21,12 +19,15 @@ class AgentTests {
     fun testSyncAdd() = runBlocking {
         val agent = Agent(State(listOf()))
 
+        var job: Job? = null
         for (number in numbers) {
             delay(2L)
-            async {
+            job = async {
                 add(agent, number, AgentConcurrencyType.SYNC)
             }
         }
+//        Make sure the last job has finished
+        job?.join()
 
         agent.fetch { state ->
             state.numbers shouldEqual numbers
@@ -37,12 +38,15 @@ class AgentTests {
     fun testAsyncAdd() = runBlocking {
         val agent = Agent(State(listOf()))
 
+        var job: Job? = null
         for (number in numbers) {
             delay(2L)
-            async {
+            job = async {
                 add(agent, number, AgentConcurrencyType.ASYNC)
             }
         }
+//        Make sure the last job has finished
+        job?.join()
 
         agent.fetch { state ->
             state.numbers shouldEqual numbers
