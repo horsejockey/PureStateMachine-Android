@@ -3,10 +3,10 @@ package io.tesseractgroup.purestatemachine
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.ASYNC
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.SYNC
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.concurrent.Executors
 
 /**
  * PureStateMachineApp
@@ -18,9 +18,9 @@ enum class AgentConcurrencyType {
 
 class Agent<State>(private var state: State) {
 
-    private val privateThread = newSingleThreadContext("Agent-${UUID.randomUUID()}")
+    private val privateThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    fun <Result: Any> fetch(closure: ((State) -> Result)): Result {
+    fun <Result : Any> fetch(closure: ((State) -> Result)): Result {
         var result: Result? = null
         sync {
             result = closure(state)
@@ -43,7 +43,7 @@ class Agent<State>(private var state: State) {
         }
     }
 
-    fun <Result: Any> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
+    fun <Result : Any> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
         var result: Result? = null
         sync {
             val resultPair = closure(state)
