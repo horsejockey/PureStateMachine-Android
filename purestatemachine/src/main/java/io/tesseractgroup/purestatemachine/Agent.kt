@@ -16,7 +16,7 @@ enum class AgentConcurrencyType {
     SYNC, ASYNC
 }
 
-class Agent<State>(private var state: State) {
+class Agent<State: Any>(private var state: State) {
 
     private val privateThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
@@ -43,12 +43,12 @@ class Agent<State>(private var state: State) {
         }
     }
 
-    fun <Result : Any> fetchAndUpdate(closure: (State) -> Pair<State, Result>): Result {
+    fun <Result : Any> fetchAndUpdate(closure: (State) -> Pair<Result, State>): Result {
         var result: Result? = null
         sync {
             val resultPair = closure(state)
-            state = resultPair.first
-            result = resultPair.second
+            state = resultPair.second
+            result = resultPair.first
         }
         return result!!
     }
