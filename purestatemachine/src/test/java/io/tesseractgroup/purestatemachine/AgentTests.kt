@@ -21,7 +21,7 @@ class AgentTests {
 
         var job: Job? = null
         for (number in numbers) {
-            delay(1L)
+            delay(4L)
             job = GlobalScope.launch {
                 add(agent, number, AgentConcurrencyType.SYNC)
             }
@@ -40,7 +40,7 @@ class AgentTests {
 
         var job: Job? = null
         for (number in numbers) {
-            delay(1L)
+            delay(2L)
             job = GlobalScope.launch {
                 add(agent, number, AgentConcurrencyType.ASYNC)
             }
