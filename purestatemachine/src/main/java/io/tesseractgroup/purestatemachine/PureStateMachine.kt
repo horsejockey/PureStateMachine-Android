@@ -20,7 +20,7 @@ class PureStateMachine<State: Any, Event: Any, Command: Any>(initialState: State
     fun handleEvent(event: Event) : List<Command> {
         val commands: List<Command> = state.fetchAndUpdate { currentState ->
             val stateUpdate = handler(currentState, event)
-            stateUpdate.commands() to (stateUpdate.state() ?: currentState)
+            FetchAndUpdateResult(stateUpdate.commands(), (stateUpdate.state() ?: currentState))
         }
         return commands
     }
