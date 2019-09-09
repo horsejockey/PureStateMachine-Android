@@ -2,11 +2,9 @@ package io.tesseractgroup.purestatemachine
 
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.ASYNC
 import io.tesseractgroup.purestatemachine.AgentConcurrencyType.SYNC
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
 
 /**
  * PureStateMachineApp
@@ -21,9 +19,12 @@ data class FetchAndUpdateResult<State, Result>(
         val updatedState: State
 )
 
-class Agent<State: Any>(private var state: State) {
+class Agent<State: Any>(private var state: State): CoroutineScope {
 
-    private val privateThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val privateThreadContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+    override val coroutineContext: CoroutineContext
+        get() = privateThreadContext + Job()
 
     fun <Result : Any> fetch(closure: ((State) -> Result)): Result {
         var result: Result? = null
@@ -59,13 +60,13 @@ class Agent<State: Any>(private var state: State) {
     }
 
     private fun sync(closure: (State) -> Unit) {
-        runBlocking(privateThread) {
+        runBlocking {
             closure(state)
         }
     }
 
     private fun async(closure: (State) -> Unit) {
-        GlobalScope.launch(privateThread) {
+        launch {
             closure(state)
         }
     }
