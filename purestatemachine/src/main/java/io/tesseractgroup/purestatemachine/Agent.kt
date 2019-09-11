@@ -60,13 +60,13 @@ class Agent<State: Any>(private var state: State): CoroutineScope {
     }
 
     private fun sync(closure: (State) -> Unit) {
-        runBlocking {
+        runBlocking(coroutineContext) {
             closure(state)
         }
     }
 
     private fun async(closure: (State) -> Unit) {
-        launch {
+        launch(coroutineContext) {
             closure(state)
         }
     }

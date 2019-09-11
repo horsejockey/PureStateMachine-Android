@@ -19,15 +19,9 @@ class AgentTests {
     fun testSyncAdd() = runBlocking {
         val agent = Agent(State(listOf()))
 
-        var job: Job? = null
         for (number in numbers) {
-            delay(4L)
-            job = GlobalScope.launch {
-                add(agent, number, AgentConcurrencyType.SYNC)
-            }
+            add(agent, number, AgentConcurrencyType.SYNC)
         }
-//        Make sure the last job has finished
-        job?.join()
 
         agent.fetch { state ->
             state.numbers shouldEqual numbers
@@ -38,15 +32,27 @@ class AgentTests {
     fun testAsyncAdd() = runBlocking {
         val agent = Agent(State(listOf()))
 
-        var job: Job? = null
         for (number in numbers) {
-            delay(2L)
-            job = GlobalScope.launch {
-                add(agent, number, AgentConcurrencyType.ASYNC)
-            }
+            add(agent, number, AgentConcurrencyType.ASYNC)
         }
-//        Make sure the last job has finished
-        job?.join()
+
+        agent.fetch { state ->
+            state.numbers shouldEqual numbers
+        }
+    }
+
+    @Test
+    fun testAsyncAddAndFetch() = runBlocking {
+        val agent = Agent(State(listOf()))
+
+        for (number in numbers) {
+                add(agent, number, AgentConcurrencyType.ASYNC)
+
+                val lastNumber = agent.fetch { state ->
+                    state.numbers.lastOrNull() ?: 0
+                }
+                lastNumber shouldEqual number
+        }
 
         agent.fetch { state ->
             state.numbers shouldEqual numbers
@@ -54,10 +60,10 @@ class AgentTests {
     }
 
     fun add(agent: Agent<State>, number: Int, concurrencyType: AgentConcurrencyType) {
-        System.out.println("Added number Thread: ${Thread.currentThread().name}")
+//        System.out.println("Added number Thread: ${Thread.currentThread().name}")
         agent.update(concurrencyType) { state ->
             val updatedList = state.numbers + number
-            System.out.println("Added to queue: ${updatedList} Thread: ${Thread.currentThread().name}")
+//            System.out.println("Added to queue: ${updatedList} Thread: ${Thread.currentThread().name}")
             return@update state.copy(numbers = updatedList)
         }
     }
