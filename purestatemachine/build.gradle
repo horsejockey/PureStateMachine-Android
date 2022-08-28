@@ -1,17 +1,15 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'org.jetbrains.dokka-android'
     id 'maven-publish'
 }
 
-task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
-    outputFormat = 'javadoc'
-    outputDirectory = "$buildDir/javadoc"
-}
+group = PROJ_GROUP
+version = PROJ_VERSION
+project.archivesBaseName = PROJ_ARTIFACTID
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     namespace = "io.tesseractgroup.purestatemachine"
 
@@ -21,12 +19,10 @@ android {
         }
         minSdkVersion 19
         targetSdkVersion 31
-        compileSdkVersion 32
-        versionCode 11
-        versionName "2.1.0"
+        versionCode 12
+        versionName "2.1.1"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-
     }
 
     buildTypes {
@@ -53,16 +49,16 @@ dependencies {
     testImplementation 'org.amshove.kluent:kluent:1.68'
 }
 
-//publishing {
-//    publications {
-//        release(MavenPublication) {
-//            groupId = 'io.tesseractgroup'
-//            artifactId = 'purestatemachine'
-//            version = '2.1.0'
-//
-//            afterEvaluate {
-//                from components.release
-//            }
-//        }
-//    }
-//}
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = PROJ_GROUP
+                artifactId = PROJ_ARTIFACTID
+                version = PROJ_VERSION
+            }
+        }
+    }
+}
