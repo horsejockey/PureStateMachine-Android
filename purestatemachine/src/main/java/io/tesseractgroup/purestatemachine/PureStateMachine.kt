@@ -9,12 +9,9 @@ class PureStateMachine<State: Any, Event: Any, Command: Any>(initialState: State
 
     private val state: Agent<State> = Agent(initialState)
 
-    var currentState: State
+    val currentState: State
         get() {
             return state.fetch { it }
-        }
-        private set(value) {
-            //none
         }
 
     fun handleEvent(event: Event) : List<Command> {
